@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Futures First 8min Quiz</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: #f8f9fa;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .question {
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .question h3 {
+            margin: 0 0 8px;
+            font-size: 16px;
+        }
+
+        .timer {
+            font-weight: bold;
+            font-size: 18px;
+            color: #d9534f;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin-top: 10px;
+            cursor: pointer;
+            border-radius: 6px;
+            border: none;
+            background: #007bff;
+            color: #fff;
+        }
+
+        button:hover {
+            background: #0056b3;
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+
+<body>
+    <div id="start-screen">
+        <h1>Futures First Practice Quiz</h1>
+        <p>You have <strong>40 questions</strong> and <strong>8 minutes</strong> (480 seconds).</p>
+        <button onclick="startQuiz()">Start Quiz</button>
+    </div>
+
+    <div id="quiz-screen" class="hidden">
+        <div class="timer">Time left: <span id="time">08:00</span></div>
+        <form id="quiz-form"></form>
+        <button type="button" onclick="submitQuiz()">Submit</button>
+    </div>
+
+    <div id="result-screen" class="hidden"></div>
+
+    <script>
+
+        const questions = [
+            { q: "Gold is trading at $1600/oz, with $1 = Rs. 50. In India, gold is sold in Rs./10g (1 oz ≈ 31.1g). If global price rises to $1650 and exchange rate becomes $1 = Rs. 48, what's the change in Indian price per 10g?", options: ["Rs. 220.5", "Rs. -150.2", "Rs. 180.3", "Rs. -257.23"], ans: 3 },
+            { q: "A portfolio has 50% in stocks returning 8%, 30% in bonds at 4%, and 20% in cash at 2%. What is the overall portfolio return?", options: ["5.6%", "4.8%", "6.2%", "5.8%"], ans: 0 },
+            { q: "If an investor invests Rs. 1000 each in 3 companies with returns 10%, 15%, and 20%, what is the average return?", options: ["15%", "14%", "13.33%", "16%"], ans: 0 },
+            { q: "If the exchange rate changes from 1 USD = Rs. 60 to Rs. 65, and silver price remains $25/oz, what is the change in Rs./10g? (1 oz ≈ 31.1g)", options: ["Rs. 40.19", "Rs. -40", "Rs. 50", "Rs. -50"], ans: 0 },
+            { q: "A portfolio has 40% equities at 12%, 30% debt at 5%, 20% savings at 7%, and 10% cash at 3%. What is the portfolio return?", options: ["8%", "6.9%", "7.1%", "7.7%"], ans: 0 },
+            { q: "Gold price is $1800/oz, $1 = Rs. 47. If price drops to $1750 and exchange rate changes to Rs. 49, what is the change in Rs./10g?", options: ["Rs. 369.77", "Rs. 300", "Rs. -250", "Rs. 250"], ans: 0 },
+            { q: "Investor invests Rs. 500 in shares priced Rs. 10, 5, 20, and 2 with returns 10%, 20%, 30%, and 40%. What is overall return?", options: ["25%", "23%", "22.5%", "24%"], ans: 0 },
+            { q: "If a portfolio has 60% stocks at 10%, 25% bonds at 6%, and 15% cash at 3%, what is the portfolio return?", options: ["7.95%", "7.5%", "7.8%", "8%"], ans: 0 },
+            { q: "Gold price is $1700/oz, $1 = Rs. 52. If price rises to $1750 and exchange rate changes to Rs. 50, what is the change in Rs./10g?", options: ["Rs. -289.39", "Rs. 200", "Rs. 150", "Rs. -150"], ans: 0 },
+            { q: "Investor invests Rs. 1000 each in 4 companies with returns 8%, 12%, 15%, and 10%. What is average return?", options: ["11.25%", "11%", "11.5%", "12%"], ans: 0 },
+            { q: "If exchange rate changes from Rs. 70 to Rs. 68 and oil price is $75/barrel, what is change in Rs. price?", options: ["Rs. -150", "Rs. 150", "Rs. -100", "Rs. 100"], ans: 0 },
+            { q: "Portfolio has 30% equities at 14%, 40% debt at 7%, 20% savings at 5%, 10% cash at 3%. Return?", options: ["8.3%", "8.1%", "8.5%", "7.9%"], ans: 0 },
+            { q: "Gold price $1850/oz, $1 = Rs. 48. Price rises to $1900, exchange rate Rs. 47. Change in Rs./10g?", options: ["Rs. 160.77", "Rs. -150", "Rs. 100", "Rs. -100"], ans: 0 },
+            { q: "Investor invests Rs. 2000 equally in 5 companies with returns 5%, 10%, 15%, 20%, 25%. Overall return?", options: ["15%", "14%", "16%", "15.5%"], ans: 0 },
+            { q: "Portfolio: 50% stocks at 9%, 30% bonds at 6%, 20% cash at 4%. Return?", options: ["7.1%", "7.5%", "7.3%", "7.7%"], ans: 0 },
+            { q: "Gold price $1550/oz, $1 = Rs. 51. Price drops to $1500, exchange rate Rs. 52. Change in Rs./10g?", options: ["Rs. -337.62", "Rs. 220", "Rs. -200", "Rs. 200"], ans: 0 },
+            { q: "Investor invests Rs. 500 in shares priced Rs. 8, 12, 15 with returns 10%, 15%, 20%. Overall return?", options: ["15%", "14%", "16%", "15.5%"], ans: 0 },
+            { q: "Exchange rate changes from Rs. 65 to Rs. 63, silver price $30/oz. Change in Rs./10g?", options: ["Rs. -18.01", "Rs. 60", "Rs. -50", "Rs. 50"], ans: 0 },
+            { q: "Portfolio: 40% equities at 13%, 30% debt at 8%, 20% savings at 6%, 10% cash at 4%. Return?", options: ["9.2%", "9.1%", "9.5%", "8.9%"], ans: 0 },
+            { q: "Gold price $1750/oz, $1 = Rs. 49. Price rises to $1800, exchange rate Rs. 48. Change in Rs./10g?", options: ["Rs. 209", "Rs. -180", "Rs. 150", "Rs. -150"], ans: 0 },
+            { q: "Investor invests Rs. 1000 each in 4 companies with returns 7%, 12%, 17%, 22%. Overall return?", options: ["14.5%", "14%", "15%", "14.8%"], ans: 0 },
+            { q: "Portfolio: 60% stocks at 11%, 25% bonds at 7%, 15% cash at 5%. Return?", options: ["9.1%", "9.5%", "9.9%", "9.3%"], ans: 0 },
+            { q: "Gold price $1650/oz, $1 = Rs. 50. Price drops to $1600, exchange rate Rs. 51. Change in Rs./10g?", options: ["Rs. -289.39", "Rs. 200", "Rs. -150", "Rs. 150"], ans: 0 },
+            { q: "Investor invests Rs. 500 in shares priced Rs. 10, 20, 25 with returns 12%, 18%, 22%. Overall return?", options: ["17.33%", "17%", "18%", "16.5%"], ans: 0 },
+            { q: "Exchange rate changes from Rs. 68 to Rs. 70, oil price $80/barrel. Change in Rs. price?", options: ["Rs. 128.62", "Rs. -160", "Rs. 140", "Rs. -140"], ans: 0 },
+            { q: "Portfolio: 35% equities at 15%, 40% debt at 9%, 15% savings at 7%, 10% cash at 5%. Return?", options: ["10.4%", "10.5%", "10.9%", "10.3%"], ans: 0 },
+            { q: "Gold price $1900/oz, $1 = Rs. 47. Price rises to $1950, exchange rate Rs. 46. Change in Rs./10g?", options: ["Rs. 176.85", "Rs. -160", "Rs. 140", "Rs. -140"], ans: 0 },
+            { q: "Investor invests Rs. 2000 equally in 4 companies with returns 6%, 11%, 16%, 21%. Overall return?", options: ["13.5%", "13%", "14%", "13.8%"], ans: 0 },
+            { q: "Portfolio: 55% stocks at 10%, 30% bonds at 6%, 15% cash at 4%. Return?", options: ["7.9%", "8.1%", "8.5%", "7.9%"], ans: 0 },
+            { q: "Gold price $1550/oz, $1 = Rs. 52. Price drops to $1500, exchange rate Rs. 53. Change in Rs./10g?", options: ["Rs. -353.7", "Rs. 220", "Rs. -200", "Rs. 200"], ans: 0 },
+            { q: "Investor invests Rs. 1000 in shares priced Rs. 15, 25, 30 with returns 9%, 14%, 19%. Overall return?", options: ["14%", "13.5%", "14.5%", "13%"], ans: 0 },
+            { q: "Exchange rate changes from Rs. 62 to Rs. 60, silver price $28/oz. Change in Rs./10g?", options: ["Rs. -18.01", "Rs. 56", "Rs. -50", "Rs. 50"], ans: 0 },
+            { q: "Portfolio: 45% equities at 14%, 35% debt at 8%, 15% savings at 6%, 5% cash at 4%. Return?", options: ["8.7%", "9.7%", "10.1%", "9.5%"], ans: 0 },
+            { q: "Gold price $1800/oz, $1 = Rs. 48. Price rises to $1850, exchange rate Rs. 47. Change in Rs./10g?", options: ["176.85", "Rs. -170", "Rs. 150", "Rs. -150"], ans: 0 },
+            { q: "Investor invests Rs. 500 in shares priced Rs. 12, 18, 22 with returns 11%, 16%, 21%. Overall return?", options: ["16%", "15.5%", "16.5%", "15%"], ans: 0 },
+            { q: "Portfolio: 50% stocks at 9%, 30% bonds at 5%, 20% cash at 3%. Return?", options: ["6.6%", "6.5%", "7%", "6.3%"], ans: 0 },
+            { q: "Gold price $1700/oz, $1 = Rs. 51. Price drops to $1650, exchange rate Rs. 52. Change in Rs./10g?", options: ["Rs. -289.39", "Rs. 230", "Rs. -200", "Rs. 200"], ans: 0 },
+            { q: "Investor invests Rs. 1000 each in 3 companies with returns 7%, 12%, 17%. Overall return?", options: ["12%", "11.5%", "12.5%", "11%"], ans: 0 },
+            { q: "Exchange rate changes from Rs. 66 to Rs. 64, oil price $78/barrel. Change in Rs. price?", options: ["Rs. -150", "Rs. 156", "Rs. -140", "Rs. 140"], ans: 1 },
+            { q: "Portfolio: 40% equities at 13%, 35% debt at 7%, 15% savings at 5%, 10% cash at 3%. Return?", options: ["8.7%", "8.5%", "8.9%", "8.3%"], ans: 0 },
+            { q: "Gold price $1850/oz, $1 = Rs. 49. Price rises to $1900, exchange rate Rs. 48. Change in Rs./10g?", options: ["176.85", "Rs. -160", "Rs. 140", "Rs. -140"], ans: 0 }
+        ];
+
+
+
+
+
+
+
+        let timer;
+        let timeLeft = 480;
+
+        function startQuiz() {
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('quiz-screen').classList.remove('hidden');
+            renderQuestions();
+            timer = setInterval(updateTimer, 1000);
+        }
+
+        function renderQuestions() {
+            const quizForm = document.getElementById('quiz-form');
+            quizForm.innerHTML = '';
+            questions.forEach((item, index) => {
+                let div = document.createElement('div');
+                div.className = 'question';
+                div.innerHTML = `<h3>Q${index + 1}. ${item.q}</h3>`;
+                item.options.forEach((opt, i) => {
+                    div.innerHTML += `<label><input type="radio" name="q${index}" value="${i}"> ${opt}</label><br>`;
+                });
+                quizForm.appendChild(div);
+            });
+        }
+
+        function updateTimer() {
+            timeLeft--;
+            if (timeLeft <= 0) {
+                clearInterval(timer);
+                submitQuiz();
+            }
+            let minutes = String(Math.floor(timeLeft / 60)).padStart(2, '0');
+            let seconds = String(timeLeft % 60).padStart(2, '0');
+            document.getElementById('time').textContent = `${minutes}:${seconds}`;
+        }
+
+        function submitQuiz() {
+            clearInterval(timer);
+            let score = 0;
+            questions.forEach((item, index) => {
+                let selected = document.querySelector(`input[name=q${index}]:checked`);
+                if (selected && parseInt(selected.value) === item.ans) {
+                    score++;
+                }
+            });
+            document.getElementById('quiz-screen').classList.add('hidden');
+            const result = document.getElementById('result-screen');
+            result.classList.remove('hidden');
+            result.innerHTML = `<h2>Result</h2><p>Score: ${score}/${questions.length} (${((score / questions.length) * 100).toFixed(2)}%)</p>`;
+        }
+    </script>
+</body>
+
+</html>
